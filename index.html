@@ -5,221 +5,279 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>music player</title>
-    <script src="vuejsv2.3.3.js"></script>
   </head>
   <style>
-    body,html{
-      margin: 0;
-      padding: 0;
-      height: 100%;
+    .music-head-wrap{display: flex;align-items: center;overflow: hidden;}
+    .music-head{width: 5rem;height: 5rem;-webkit-border-radius: 2.5rem;-moz-border-radius: 2.5rem;-ms-border-radius: 2.5rem;border-radius: 2.5rem;overflow: hidden;position: relative;margin: 1.8rem 1rem 0 1rem;}
+      .music-head-img{position: relative;width: 100%;height: 100%;-webkit-border-radius: 2.5rem;-moz-border-radius: 2.5rem;-ms-border-radius: 2.5rem;border-radius: 2.5rem;overflow: hidden;}
+      .music-head .music-head-img img{width: 100%;height: auto;min-height: 5rem;}
+      .music-head a{display: flex;width: 100%;height: 100%;align-items:center;justify-content: center;position: absolute;left: 0;top: 0;background: rgba(0, 0, 0, .5);color: rgba(255, 255, 255, .6);font-size: 2.5rem;-webkit-border-radius: 2.5rem;-moz-border-radius: 2.5rem;-ms-border-radius: 2.5rem;border-radius: 2.5rem;overflow: hidden;}
+      .music-play.current .music-head-img{-webkit-animation: musicplay 10s infinite linear;-moz-animation: musicplay 10s infinite linear;-ms-animation: musicplay 10s infinite linear;-o-animation: musicplay 10s infinite linear;animation: musicplay 10s infinite linear;}
+      .music-head .icon-play{display: none;}
+      .music-play.current .icon-stop{display: none;}
+      .music-play.current .icon-play{display: block;}
+      .music-length{font-size: .8rem;line-height: 2rem;text-align: center;}
+      #music-play-time{display: none;}
+      .music-play.current .music-length span{display: none;}
+      .music-play.current .music-length span#music-play-time{display: block;}
+     
+    .music-list{width: 100%;height: auto;overflow: hidden;}
+    .musiclist-wrap{width: 31.33%;height: 10rem;background: #fff;float: left;-webkit-border-radius: 5px;-moz-border-radius: 5px;-ms-border-radius: 5px;border-radius: 5px;box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);display: flex;box-sizing: border-box;margin: 0 1% 1.5rem 1%;position: relative;}
+      .music-info{max-width: 70%;}
+      .music-info-name{font-size: 1.5rem;white-space: nowrap;padding: .8rem 0 .2rem 0;text-overflow: ellipsis;overflow: hidden;}
+      .music-info-author,.music-info-uploadtime,.music-info-collection,.music-info-operation{font-size: .8rem;white-space: nowrap;}
+     
+    #musicplayer-bar-container{position: absolute;bottom: 0;left: 0;width: 100%;height: .5rem;background: #eee;}
+      #musicplayer-bar-container:hover{cursor: pointer;}
+      #musicplayer-bar-container .progress-bar{transition-duration:.3s;background: #00bcd4;position: absolute;left: 0;top: 0;height: 100%;}
+    #musicplayer-volume-container{width: 1.2rem;height: 8rem;position: absolute;right: .2rem;bottom: .6rem;}
+      #musicplayer-volume-bar-container{width: 30%;height: 6.5rem;position: relative;background: #00bcd4;border-radius: 3px;overflow: hidden;margin: 0 auto;cursor: pointer;display: none;}
+      #musicplayer-volume-bar{background: #eee;position: absolute;left: 0;top: 0;width: 100%;-webkit-transition: .3s;-moz-transition: .3s;-ms-transition: .3s;transition: .3s;height: 0%;}
+      #musicplayer-volume-container:hover #musicplayer-volume-bar-container{display: block;}
+      .musicplayer-volume-icon{position: absolute;left: 0;bottom: 0;width: 100%;}
+      .musicplayer-volume-icon a{color: #666;}
+     
+    @media screen and (max-width:1500px){
+      .music-list .musiclist-wrap{width: 48%;}
     }
-    #app{
-      padding: 10px;
-      background-image: url("./background.jpg");
-      background-repeat:no-repeat;
-      background-size:100% 100%;
-      -moz-background-size:100% 100%;
-      height: 100%;
+     
+    @media screen and (max-width:830px){
+      .music-list .musiclist-wrap{width: 100%;margin: 0 0 1.5rem 0;}
     }
-    .btns {
-      margin: 10px;
+     
+    @media screen and (max-width:575.98px){
+      .music-list .musiclist-wrap{align-items: center;justify-content: center;height: auto;padding-bottom: .5rem;flex-direction: column;}
+      .music-info{max-width: 90%;}
+      .music-head{margin: 1rem 1rem 0 1rem;}
     }
-  </style>
+     
+    @-webkit-keyframes musicplay{
+      100%{-webkit-transform: rotate(360deg)}
+    }
+    @-moz-keyframes musicplay{
+      100%{-moz-transform: rotate(360deg)}
+    }
+    @-ms-keyframes musicplay{
+      100%{-ms-transform: rotate(360deg)}
+    }
+    @keyframes musicplay{
+      100%{transform: rotate(360deg)}
+    }
+    </style>
+</style>
+    </style>
   <body>
-    <div id="app">
-      
-      <div style="width:100%;">
-        <audio
-        style="width:95%;margin:0 auto;"
-        controls
-        :src="musicsrc"
-        @canplaythrough="loaded()"
-        @timeupdate="time()"
-        @ended="end()"
-        ref="music"
-      >
-        您的浏览器版本过低，请升级您的浏览器
-      </audio>
-      </div>
-
-      <div class="left" style="display:inline-block;width:40%;margin:0 10px;vertical-align: top;">
-          <p>正在播放：{{ currentTitle }}</p>
-          <p>当前进度:{{ currenttime }}s</p>
-          <p>总时长:{{ alltime }}</p>
-          <input class="btns" type="button" value="静音" @click="novoice" /><input
-          type="button"
-          value="播放"
-          @click="playing"
-        /><br />
-        <input class="btns" type="button" value="上一曲" @click="last" /><input
-          type="button"
-          value="下一曲"
-          @click="next"
-        /><br />
-        <label>音量：</label
-        ><input
-          class="btns"
-          type="range"
-          min="0.1"
-          max="1"
-          step="0.1"
-          @change="vol()"
-          ref="volume"
-        /><br />
-        <label>播放进度：</label
-        ><input
-          class="btns"
-          type="range"
-          min="1"
-          max="286"
-          step="1"
-          @change="range()"
-          ref="progress"
-        /><br />
-      </div>
-      <div class="right" style="display:inline-block;width:50%;margin:0 10px;vertical-align: top;">
-        <p>
-            播放列表：
-            <ul>
-              <li v-for="item in sing" style="line-height: 30px;list-style: decimal;text-shadow:rgb(130, 203, 243) 1px 1px 10px">
-                {{item}}
-              </li>
-            </ul>
-          </p>
-      </div>
-      
-      
+    <div class="music-list">
+      <div class="musiclist-wrap">
+        <div class="music-play">
+          <div class="music-head">
+            <div class="music-head-img">
+              <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1567090721972&di=7baae28199eefbb5ee37e1bebdf31484&imgtype=0&src=http%3A%2F%2Fztd00.photos.bdimg.com%2Fztd%2Fw%3D700%3Bq%3D50%2Fsign%3Db4d4990802d162d985ee601c21e4d8d1%2F5fdf8db1cb134954bfff3fa85e4e9258d0094a1d.jpg" alt="晴天">
+            </div>
+            <a href="javascript:;" data-key="http://mp3.9ku.com/hot/2004/07-17/41813.mp3" onclick="playMusic(this)" class="music-head-mask">
+              <i class="iconfont icon-play"></i>
+              <i class="iconfont icon-stop"></i>
+            </a>
+          </div>
+          <div class="music-length text-center">
+            <span id="music-play-time"></span>
+            <span>04:29</span>
+          </div>
+        </div>
+        <div class="music-info">
+          <div class="music-info-name" title=" 晴天 ">
+             晴天
+          </div>
+          <div class="music-info-author">
+            <i class="iconfont"></i> 作者:  周杰伦
+          </div>
+          <div class="music-info-uploadtime">
+            <i class="iconfont"></i> 上传时间:  2019-08-30 12:25:34
+          </div>
+          <div class="music-info-collection">
+            <i class="iconfont"></i> 收藏量:  5426
+          </div>
+          <div class="music-info-operation">
+            <!-- <button type="button" rel="tooltip" class="btn btn-info btn-sm" title="推荐"><i class="iconfont"></i> 推荐</button> -->
+            <!-- <button type="button" rel="tooltip" class="btn btn-danger btn-sm" title="删除"><i class="iconfont"></i> 删除</button> -->
+          </div>
+        </div>
     </div>
-
-    <script>
-      new Vue({
-        el: "#app",
-        data: {
-          currentTitle: "",
-          currenttime: "", //已播放时间
-          alltime: "", //歌曲总时长
-          isplay: true, //是否播放状态
-          isnovoice: false, //是否静音状态
-          sing: [
-            "http://mp3.9ku.com/hot/2004/07-17/41813.mp3",
-            "http://mp3.9ku.com/hot/2007/01-21/80753.mp3",
-            "http://mp3.9ku.com/m4a/68772.m4a",
-            "./晴天.mp3",
-            "./一万个理由.m4a",
-
-          ], //歌曲路径数组
-          musicsrc: "", //双向绑定音乐路径
-          index: 0 //当前歌曲的索引
-        },
-
-        watch: {
-          musicsrc(val) {
-            this.currentTitle = val.split("/")[val.split("/").length - 1];
-          }
-        },
-        methods: {
-          loaded() {
-            //歌曲加载完成可以播放后执行该函数
-            this.$refs.music.play();
-            this.alltime = this.$refs.music.duration;
-            this.$refs.music.volume = 0.4;
-            this.$refs.volume.value = 0.4;
-            // this.$refs.music.currentTime=0;
-            // this.$refs.progress.value=0;
-            let allmm, allss;
-            if (this.alltime < 60) {
-              //把毫秒数转换为分和杪
-              this.alltime = Math.round(this.alltime);
-              if (this.alltime < 10) {
-                //小于十秒前面加0
-                this.alltime = "0" + Math.round(this.alltime);
-              }
-            } else {
-              allmm = Math.floor(this.alltime / 60);
-              allss = Math.round(this.alltime - allmm * 60);
-              this.alltime = allmm + ":" + allss;
-            }
-          },
-          playing() {
-            //播放以及暂停功能实现
-            if (this.isplay) {
-              this.$refs.music.pause();
-              this.isplay = !this.isplay;
-            } else {
-              this.$refs.music.play();
-              this.isplay = !this.isplay;
-            }
-          },
-          novoice() {
-            //静音功能实现
-            this.isnovoice = !this.isnovoice;
-            this.$refs.music.muted = this.isnovoice;
-          },
-          time() {
-            //当前歌曲已经播放的时间
-            this.currenttime = this.$refs.music.currentTime;
-            let allmm, allss;
-            if (this.currenttime < 60) {
-              //把毫秒数转换为分和杪
-              this.currenttime = Math.round(this.currenttime);
-              if (this.currenttime < 10) {
-                this.currenttime = "0" + Math.round(this.currenttime);
-              }
-            } else {
-              allmm = Math.floor(this.currenttime / 60);
-              allss = Math.round(this.currenttime - allmm * 60);
-              this.currenttime = allmm + ":" + allss;
-            }
-            // console.log(this.$refs.music.currentTime)
-          },
-          end() {
-            //当前歌曲是否播放完成处理
-            console.log(this.$refs.music.ended);
-            if (this.$refs.music.ended) {
-              if (this.index < this.sing.length) {
-                this.index++;
-              } else {
-                this.index = 0;
-              }
-              this.musicsrc = this.sing[this.index];
-            }
-          },
-          next() {
-            //下一曲
-            if (this.index != this.sing.length - 1) {
-              this.index++;
-            } else {
-              this.index = 0;
-            }
-            // console.log(this.index);
-            this.musicsrc = this.sing[this.index];
-          },
-          last() {
-            //上一曲
-            if (this.index > 0) {
-              this.index--;
-            } else {
-              this.index = this.sing.length - 1;
-            }
-            // console.log(this.index);
-            this.musicsrc = this.sing[this.index];
-          },
-          vol() {
-            //音量君
-            console.log(this.$refs.volume.value);
-            this.$refs.music.volume = this.$refs.volume.value;
-          },
-          range() {
-            //进度君
-            console.log(this.$refs.progress.value);
-            this.$refs.music.currentTime = this.$refs.progress.value;
-            this.currenttime = this.$refs.music.currentTime;
-          }
-        },
-        mounted() {
-          this.musicsrc = this.sing[this.index];
-        }
-      });
-    </script>
+   
+    <div class="musiclist-wrap">
+        <div class="music-play">
+          <div class="music-head">
+            <div class="music-head-img">
+              <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1567091126642&di=5a4eaa4fad1fb1654de3eea5a2682f10&imgtype=0&src=http%3A%2F%2Fi0.hdslb.com%2Fbfs%2Farchive%2F158740d7e12b444173606954d1eca8b36a252d4f.jpg" alt="梁汉文">
+            </div>
+            <a href="javascript:;" data-key="http://mp3.9ku.com/hot/2007/01-21/80753.mp3" onclick="playMusic(this)" class="music-head-mask">
+              <i class="iconfont icon-play"></i>
+              <i class="iconfont icon-stop"></i>
+            </a>
+          </div>
+          <div class="music-length text-center">
+            <span id="music-play-time"></span>
+            <span>04:19</span>
+          </div>
+        </div>
+        <div class="music-info">
+          <div class="music-info-name" title=" 玫瑰花的葬礼 ">
+            玫瑰花的葬礼
+          </div>
+          <div class="music-info-author">
+            <i class="iconfont"></i> 作者:  许嵩
+          </div>
+          <div class="music-info-uploadtime">
+            <i class="iconfont"></i> 上传时间:  2019-08-30 14:32:28
+          </div>
+          <div class="music-info-collection">
+            <i class="iconfont"></i> 收藏量:  1215
+          </div>
+          <div class="music-info-operation">
+            <!-- <button type="button" rel="tooltip" class="btn btn-info btn-sm" title="推荐"><i class="iconfont"></i> 推荐</button> -->
+            <!-- <button type="button" rel="tooltip" class="btn btn-danger btn-sm" title="删除"><i class="iconfont"></i> 删除</button> -->
+          </div>
+        </div>
+    </div>
+  </div>
+   
+  <audio controls="controls" style="display: none" id="music-player">
+    Your browser does not support the audio element.
+  </audio>
   </body>
+  <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+   
+  <script>
+  var musicPlayer = document.getElementById('music-player')
+  var musicPlayerTimer
+   
+  function playMusic(obj) {
+    var musicPlayUrl = musicPlayer.src
+    var thisKey = $(obj).data('key')
+    clearInterval(musicPlayerTimer)
+     
+    $('.music-play').removeClass('current')
+     
+    if(musicPlayUrl == thisKey){
+      //停止播放音乐
+      if(musicPlayer.paused){
+        $(obj).parent().parent().addClass('current')
+        musicPlayer.play()
+        musicPlayerTimer = setInterval(musicPlayProgress,1000)
+      }else{
+        musicPlayer.pause()
+      }
+    }else{
+      //更换音乐播放
+      musicPlayer.src = thisKey
+      musicPlayer.play()
+      $(obj).parent().parent().addClass('current')
+      $('#musicplayer-bar-container,#musicplayer-volume-container,#music-play-time').remove()
+      var thisCon = $(obj).parent().parent()
+      var musicPlayerBarHtml = `<div class="progress" id="musicplayer-bar-container">
+                            <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="width: 0%;" id="music-player-bar">
+                            </div>
+                        </div>`
+      var musicPlayerVolumeHtml = `<div id="musicplayer-volume-container">
+                        <div id="musicplayer-volume-bar-container">
+                          <div id="musicplayer-volume-bar"></div>
+                        </div>
+                        <div class="musicplayer-volume-icon">
+                          <a href="javascript:;" onclick="muteSetting(this)"><i class="iconfont"></i></a>
+                        </div>
+                      </div>`                     
+      thisCon.append(musicPlayerBarHtml,musicPlayerVolumeHtml)
+      $(obj).parent().parent().find('.music-length').append('<span id="music-play-time"></span>')
+      musicPlayerTimer = setInterval(musicPlayProgress,1000)
+    }
+   
+    // 控制进度条
+    $('#musicplayer-bar-container').bind('click',function(e){
+      var leftDistance = e.offsetX
+      var clickProgress = (leftDistance / $(this).width())
+      musicPlayer.currentTime = musicPlayer.duration * clickProgress
+      $('#music-player-bar').css('width',clickProgress * 100 + '%')
+    })
+   
+    // 控制音量
+    $('#musicplayer-volume-bar-container').bind('click',function(e){
+      var topDistance = e.offsetY
+      var clickProgress = (topDistance / $(this).height())
+      musicVolume = 1 - clickProgress
+      musicPlayer.volume = musicVolume
+      $('#musicplayer-volume-bar').css('height', clickProgress * 100 + '%')
+      if(musicVolume > 0){
+        musicPlayer.muted = false
+        $('.musicplayer-volume-icon').find('i').html('')
+        $('.musicplayer-volume-icon').removeClass('mute')
+      }
+    })
+  }
+   
+  // 检测播放进度
+  function musicPlayProgress(){
+      var musicTotalLength = musicPlayer.duration
+      var musicCurrentLength = musicPlayer.currentTime
+      var musicProgress = (musicCurrentLength / musicTotalLength) * 100 + '%'
+      $('#music-play-time').html(timeConversion(musicCurrentLength) + ' / ' + timeConversion(musicTotalLength))
+      $('#music-player-bar').css('width',musicProgress)
+      if(musicPlayer.ended){
+        // 检测是否暂停状态
+        $('.music-play').removeClass('current')
+      }
+      if(musicPlayer.error != null){
+        // 检测是否播放错误
+        clearInterval(musicPlayerTimer)
+        $('.music-play').removeClass('current')
+        alert('音乐播放错误！')
+      }
+  }
+   
+  // 静音设置
+  function muteSetting(obj){
+    var isHasMute = $(obj).parent().hasClass('mute')
+    if(isHasMute){
+      // 开启声音
+      musicPlayer.muted = false
+      musicPlayer.volume = 1
+      $(obj).find('i').html('')
+      $(obj).parent().removeClass('mute')
+      $('#musicplayer-volume-bar').css('height','0%')
+    }else{
+      // 设置静音
+      musicPlayer.muted = true
+      $(obj).find('i').html('')
+      $(obj).parent().addClass('mute')
+      $('#musicplayer-volume-bar').css('height','100%')
+    }
+  }
+   
+  // 时间格式转换
+  function timeConversion(time){
+    var seconds = parseInt(time)   // 秒
+    var minutes = 0                // 分
+    var hours = 0                  // 小时
+    if(seconds > 60) {
+        minutes = parseInt(seconds/60);
+        seconds = parseInt(seconds%60);
+        if(minutes > 60) {
+            hours = parseInt(minutes/60);
+            minutes = parseInt(minutes%60);
+        }
+    }
+    var result = ''
+    if(seconds < 10)
+      seconds = '0' + seconds
+    if(minutes < 10)
+      minutes = '0' + minutes
+    if(hours > 0) {
+      if(hours < 10)
+        hours = '0' + hours
+      result = hours + ':' + minutes + ":" + seconds
+    }else{
+      result = minutes + ":" + seconds
+    }
+    return result
+  }
+  </script>
 </html>
